@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Metode Numerik</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+
+<body>
+
+    <div id="splash">
+        <h1 class="splash-text">Kelompok 1 Teknik Informatika R4U</h1>
+        <p class="splash-sub">Metode Numerik</p>
+    </div>
+
+    <div class="container">
+        <h1 class="title">Kalkulator Metode Numerik</h1>
+
+        <div class="card">
+
+            <label>Pilih Metode</label>
+            <select id="metode" onchange="ubahPlaceholder()">
+                <option value="gauss">Eliminasi Gauss</option>
+                <option value="gaussSeidel">Gauss Seidel</option>
+                <option value="bisection">Metode Bagi Dua</option>
+                <option value="secant">Metode Secant</option>
+                <option value="newton">Interpolasi Newton</option>
+                <option value="trapesium">Integrasi Trapesium</option>
+                <option value="runge">Runge Kutta Orde 3</option>
+            </select>
+
+            <label>Input Data</label>
+            <div id="method-blocks">
+
+                <div class="method-block" id="block-gauss">
+                    <label>Pilih variabel matriks (n × n):</label>
+                    <label>Isi koefisien dan konstanta sesuai variabel matriks.</label>
+                    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+                        <select id="gauss-size"></select>
+                        <button type="button" onclick="createMatrixGrid('gauss')">
+                            Buat Matriks
+                        </button>
+                        <button type="button" onclick="fillGaussExample()">
+                            Contoh Isi
+                        </button>
+                    </div>
+                    <div class="matrix-wrapper">
+                        <div id="gauss-grid-container"></div>
+                    </div>
+                    <p class="matrix-hint">
+                        Geser ke samping untuk melihat seluruh matriks
+                    </p>
+                </div>
+
+                <div class="method-block" id="block-gaussSeidel">
+                    <label>Pilih variabel matriks (n × n):</label>
+                    <label>Isi matriks, solusi awal, toleransi (ε), dan iterasi.</label>
+                    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+                        <select id="gs-size"></select>
+                        <button type="button" onclick="createMatrixGrid('gaussSeidel')">
+                            Buat Matriks
+                        </button>
+                        <button type="button" onclick="fillGaussSeidelExample()">Contoh Isi</button>
+                    </div>
+                    <div class="matrix-wrapper">
+                        <div id="gs-grid-container"></div>
+                    </div>
+                    <p class="matrix-hint">Geser ke samping untuk melihat seluruh matriks</p>
+                    <div style="margin-top:12px;">
+                        <label>Solusi Awal (opsional)</label>
+                        <div style="display:flex;gap:8px;">
+                            <input type="number" id="gs-x1" placeholder="1">
+                            <input type="number" id="gs-x2" placeholder="2">
+                            <input type="number" id="gs-x3" placeholder="3">
+                        </div>
+                        <small style="display:block;margin-top:6px;opacity:.8;">
+                            Kosongkan jika ingin menggunakan nilai awal 0.
+                        </small>
+                    </div>
+
+                    <div style="display:flex;gap:8px;margin-top:12px;">
+                        <div style="flex:1;">
+                            <label>Toleransi (ε)</label>
+                            <input type="number" id="gs-tol" step="any" placeholder="0.0001">
+                        </div>
+                        <div style="flex:1;">
+                            <label>Iterasi</label>
+                            <input type="number" id="gs-iter" placeholder="Opsional Jika Ada">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bisection -->
+                <div class="method-block" id="block-bisection">
+                    <label>Fungsi (variabel `x`):</label>
+                    <input id="bisection-f" type="text" placeholder="Contoh: x^3-4*x-9">
+
+                    <div style="display:flex;gap:8px;margin-top:6px;">
+                        <div style="flex:1">
+                            <label>a:</label>
+                            <input id="bisection-a" type="text" placeholder="1">
+                        </div>
+
+                        <div style="flex:1">
+                            <label>b:</label>
+                            <input id="bisection-b" type="text" placeholder="2">
+                        </div>
+
+                        <div style="flex:1">
+                            <label>Ketelitian:</label>
+                            <input id="bisection-digits" type="number" min="0" max="14" placeholder="3 (Opsional)">
+                        </div>
+
+                        <div style="flex:1">
+                            <label>Toleransi:</label>
+                            <input id="bisection-tol" type="number" step="any" placeholder="0.0001 (Opsional)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Secant -->
+                <div class="method-block" id="block-secant">
+                    <label>Fungsi f(x):</label>
+                    <input id="secant-f" type="text" placeholder="Contoh: x^3-4*x-9">
+                    <div style="display:flex;gap:8px;margin-top:6px;">
+                        <div style="flex:1"><label>Nilai x0:</label>
+                            <input id="secant-x0" type="text" placeholder="2">
+                        </div>
+
+                        <div style="flex:1"><label>Nilai x1:</label>
+                            <input id="secant-x1" type="text" placeholder="3">
+                        </div>
+                        <div style="flex:1"><label>Iterasi:</label><input id="secant-iter" type="number"
+                                placeholder="10 (Opsional)"></div>
+                    </div>
+                </div>
+
+                <!-- Newton (interpolasi) -->
+                <div class="method-block" id="block-newton">
+                    <label>Data x (pisah/spasi):</label>
+                    <input id="newton-x" type="text" placeholder="Contoh: 1 2 3">
+
+                    <label>Data y atau f(x) (pisah/spasi):</label>
+                    <input id="newton-y" type="text" placeholder="Contoh: 2 3 5">
+
+                    <label>Nilai x yang dicari:</label>
+                    <input id="newton-target" type="number" step="any" placeholder="Contoh: 2.5">
+
+                    <label>Fungsi asli (opsional, untuk galat):</label>
+                    <input id="newton-fasli" type="text" placeholder="Contoh: x^2+1">
+                </div>
+
+                <!-- Trapesium -->
+                <div class="method-block" id="block-trapesium">
+                    <label>Fungsi (variabel `x`):</label>
+                    <input id="trapesium-f" type="text" placeholder="x^2">
+
+                    <div style="display:flex;gap:8px;margin-top:6px;">
+                        <div style="flex:1">
+                            <label>a:</label>
+                            <input id="trapesium-a" type="text" placeholder="0">
+                        </div>
+
+                        <div style="flex:1">
+                            <label>b:</label>
+                            <input id="trapesium-b" type="text" placeholder="2">
+                        </div>
+
+                        <div style="flex:1">
+                            <label>n:</label>
+                            <input id="trapesium-n" type="number" placeholder="4">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Runge Kutta -->
+                <div class="method-block" id="block-runge">
+                    <label>Fungsi dy/dx = f(x,y):</label>
+                    <input id="runge-f" type="text" placeholder="x+y">
+
+                    <div style="display:flex;gap:8px;margin-top:6px;">
+                        <div style="flex:1">
+                            <label>x0:</label>
+                            <input id="runge-x0" type="text" placeholder="0">
+                        </div>
+
+                        <div style="flex:1">
+                            <label>y0:</label>
+                            <input id="runge-y0" type="text" placeholder="2">
+                        </div>
+
+                        <div style="flex:1">
+                            <label>h:</label>
+                            <input id="runge-h" type="text" placeholder="0.1">
+                        </div>
+                    </div>
+
+                    <div style="margin-top:6px;">
+                        <label>Iterasi:</label>
+                        <input id="runge-iter" type="number" placeholder="5">
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="helper" id="helper"></div>
+
+            <button onclick="hitung()">Hitung</button>
+
+            <button type="button" onclick="clearAllInputs()" class="btn-danger">
+                <i class="ti ti-trash"></i> Bersihkan Semua
+            </button>
+
+            <div class="sub-actions">
+                <button onclick="copyResult()">
+                    <i class="ti ti-copy"></i> Copy
+                </button>
+
+                <button onclick="exportPDF()">
+                    <i class="ti ti-file-text"></i> PDF
+                </button>
+
+                <button onclick="toggleHistory()">
+                    <i class="ti ti-history"></i> History
+                </button>
+            </div>
+
+            <div id="history-list" class="history-box">
+
+                <div id="history-empty" class="history-empty">
+                    <i class="ti ti-history-off"></i>
+                    <p>Riwayat perhitungan belum tersedia</p>
+                    <small>Lakukan perhitungan terlebih dahulu</small>
+                </div>
+
+            </div>
+
+            <div class="loading" id="loading">Menghitung...</div>
+
+            <div class="output-wrapper">
+                <div class="output" id="output">Hasil akan muncul disini...</div>
+            </div>
+
+            <footer class="footer-floating">
+
+                <div class="footer-glow"></div>
+
+                <div class="footer-content">
+
+                    <div class="footer-left">
+                        <i class="ti ti-code"></i><span>Developed by
+                            <a href="https://aryaadev.github.io/Portfolio_/" target="_blank">Muhamad Arya Darmawan</a>
+                        </span>
+                    </div>
+
+                    <div class="footer-right">
+                        <a href="https://www.instagram.com/aryaadrmwn/" class="icon"><i
+                                class="ti ti-brand-instagram"></i></a>
+                        <a href="https://www.linkedin.com/in/muhamad-arya-darmawan-32891b322/" class="icon"><i
+                                class="ti ti-brand-linkedin"></i></a>
+                        <a href="https://aryaadev.github.io/Portfolio_/" class="icon" target="_blank"><i
+                                class="ti ti-world"></i></a>
+                    </div>
+
+                </div>
+
+            </footer>
+        </div>
+
+        <div class="team-section">
+            <h2 class="team-title">
+                <i class=""></i>Support By
+            </h2>
+            <p class="team-subtitle"><strong>© 2026</strong> KELOMPOK 1 R4U. All rights reserved.</p>
+
+            <div class="team-slider-wrapper">
+                <button class="nav-btn left" onclick="scrollSlider(-1)">
+                    <i class="ti ti-chevron-left"></i>
+                </button>
+
+                <div class="team-slider">
+
+                    <div class="team-card" style="--card-bg:#fde047;">
+                        <div class="team-photo">
+                            <div class="avatar-initials">M</div>
+                        </div>
+                        <div class="team-info">
+                            <h3>Muhamad Arya Darmawan</h3>
+                            <p>Full Stack Developer</p>
+                        </div>
+                    </div>
+
+                    <div class="team-card" style="--card-bg:#fbcfe8;">
+                        <div class="team-photo">
+                            <div class="avatar-initials">S</div>
+                        </div>
+                        <div class="team-info">
+                            <h3>Septian Saputra</h3>
+                            <p>UI/UX Designer</p>
+                        </div>
+                    </div>
+
+                    <div class="team-card" style="--card-bg:#f472b6;">
+                        <div class="team-photo">
+                            <div class="avatar-initials">M</div>
+                        </div>
+                        <div class="team-info">
+                            <h3>Muhamad Rabih Atsyah</h3>
+                            <p>Data & Quality Assurance</p>
+                        </div>
+                    </div>
+
+                    <div class="team-card" style="--card-bg:#38BDF8;">
+                        <div class="team-photo">
+                            <div class="avatar-initials">F</div>
+                        </div>
+                        <div class="team-info">
+                            <h3>Fajrina Hastatari</h3>
+                            <p>Mathematician</p>
+                        </div>
+                    </div>
+
+                    <div class="team-card" style="--card-bg:#38BDF8;">
+                        <div class="team-photo">
+                            <div class="avatar-initials">F</div>
+                        </div>
+                        <div class="team-info">
+                            <h3>Fahriansyah Idris</h3>
+                            <p>Mathematician</p>
+                        </div>
+                    </div>
+
+                    <div class="team-card" style="--card-bg:#38BDF8;">
+                        <div class="team-photo">
+                            <div class="avatar-initials">S</div>
+                        </div>
+                        <div class="team-info">
+                            <h3>Salwa Widad Fauziah</h3>
+                            <p>Mathematician</p>
+                        </div>
+                    </div>
+
+                    <div class="team-card" style="--card-bg:#38BDF8;">
+                        <div class="team-photo">
+                            <div class="avatar-initials">M</div>
+                        </div>
+                        <div class="team-info">
+                            <h3>Muhammad Ridho</h3>
+                            <p>Mathematician</p>
+                        </div>
+                    </div>
+
+                    <div class="team-card" style="--card-bg:#A3E635;">
+                        <div class="team-photo">
+                            <div class="avatar-initials">N</div>
+                        </div>
+                        <div class="team-info">
+                            <h3>Nabila Halimatul Sadiah</h3>
+                            <p>Technical Writer</p>
+                        </div>
+                    </div>
+
+                    <div class="team-card" style="--card-bg:#A3E635;">
+                        <div class="team-photo">
+                            <div class="avatar-initials">M</div>
+                        </div>
+                        <div class="team-info">
+                            <h3>Melanie Ayu Dwi Agustine</h3>
+                            <p>Technical Writer</p>
+                        </div>
+                    </div>
+
+                    <div class="team-card" style="--card-bg:#A3E635;">
+                        <div class="team-photo">
+                            <div class="avatar-initials">M</div>
+                        </div>
+                        <div class="team-info">
+                            <h3>Muhammad Daffa Adilah</h3>
+                            <p>Technical Writer</p>
+                        </div>
+                    </div>
+
+                    <div class="team-card" style="--card-bg:#bae6fd;">
+                        <div class="team-photo">
+                            <div class="avatar-initials">B</div>
+                        </div>
+                        <div class="team-info">
+                            <h3>Bimo Aji Prasetyo</h3>
+                            <p>Quality Control</p>
+                        </div>
+                    </div>
+
+                    <div class="team-card" style="--card-bg:#bae6fd;">
+                        <div class="team-photo">
+                            <div class="avatar-initials">N</div>
+                        </div>
+                        <div class="team-info">
+                            <h3>Nabil Syafa Rakaditya</h3>
+                            <p>Quality Control</p>
+                        </div>
+                    </div>
+
+                    <div class="team-card" style="--card-bg:#bae6fd;">
+                        <div class="team-photo">
+                            <div class="avatar-initials">I</div>
+                        </div>
+                        <div class="team-info">
+                            <h3>Imadudin Zaki</h3>
+                            <p>Quality Control</p>
+                        </div>
+                    </div>
+
+                    <div class="team-card" style="--card-bg:#bae6fd;">
+                        <div class="team-photo">
+                            <div class="avatar-initials">S</div>
+                        </div>
+                        <div class="team-info">
+                            <h3>Stefanus Fredly Makaenas</h3>
+                            <p>Quality Control</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <button class="nav-btn right" onclick="scrollSlider(1)">
+                    <i class="ti ti-chevron-right"></i>
+                </button>
+
+            </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="script.js"></script>
+        <button class="btn-tutorial-fixed" onclick="toggleTutorial()" title="Buka Tutorial">
+            <i class="ti ti-book"></i>
+        </button>
+
+        <div id="tutorialGuide" class="tutorial-guide">
+            <button class="guide-close" onclick="closeGuide()">
+                <i class="ti ti-x"></i>
+            </button>
+            <div class="guide-arrow"></div>
+            <div class="guide-content">
+                <div class="guide-title">Tutorial Penggunaan</div>
+                <div class="guide-text">Klik tombol tutorial di pojok kanan atas untuk melihat panduan penggunaan
+                    kalkulator</div>
+            </div>
+        </div>
+
+        <div id="tutorialModal" class="modal">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <i class="ti ti-book"></i>
+                        <h2>Tutorial Penggunaan</h2>
+                    </div>
+                    <button onclick="toggleTutorial()" class="close-btn" aria-label="Tutup Tutorial">
+                        <i class="ti ti-x"></i>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="tutorial-card symbol-guide-card">
+                        <div class="tutorial-card-header">
+                            <i class="ti ti-keyboard"></i>
+                            <h3>Panduan Simbol Inputan</h3>
+                        </div>
+                        <p class="text-muted">Gunakan format di bawah ini saat memasukkan fungsi matematika atau rumus
+                            ke dalam kalkulator:</p>
+
+                        <div class="symbol-grid">
+                            <div class="symbol-item">
+                                <div class="symbol-icon"><kbd>*</kbd></div>
+                                <div class="symbol-desc">
+                                    <strong>Perkalian</strong>
+                                    <span>Contoh: <code>4*x</code></span>
+                                </div>
+                            </div>
+
+                            <div class="symbol-item">
+                                <div class="symbol-icon"><kbd>/</kbd></div>
+                                <div class="symbol-desc">
+                                    <strong>Pembagian</strong>
+                                    <span>Contoh: <code>x/2</code></span>
+                                </div>
+                            </div>
+
+                            <div class="symbol-item">
+                                <div class="symbol-icon"><kbd>^</kbd></div>
+                                <div class="symbol-desc">
+                                    <strong>Pangkat</strong>
+                                    <span>Contoh: <code>x^3</code></span>
+                                </div>
+                            </div>
+
+                            <div class="symbol-item">
+                                <div class="symbol-icon"><kbd>+</kbd> <kbd>-</kbd></div>
+                                <div class="symbol-desc">
+                                    <strong>Tambah / Kurang</strong>
+                                    <span>Contoh: <code>x+y-5</code></span>
+                                </div>
+                            </div>
+
+                            <div class="symbol-item">
+                                <div class="symbol-icon"><kbd>sqrt()</kbd></div>
+                                <div class="symbol-desc">
+                                    <strong>Akar Kuadrat</strong>
+                                    <span>Contoh: <code>sqrt(x)</code></span>
+                                </div>
+                            </div>
+
+                            <div class="symbol-item">
+                                <div class="symbol-icon"><kbd>log()</kbd></div>
+                                <div class="symbol-desc">
+                                    <strong>Logaritma / Natural</strong>
+                                    <span>Bisa juga: <code>ln(x)</code></span>
+                                </div>
+                            </div>
+
+                            <div class="symbol-item">
+                                <div class="symbol-icon"><kbd>sin()</kbd></div>
+                                <div class="symbol-desc">
+                                    <strong>Trigonometri</strong>
+                                    <span>Juga: <code>cos()</code>, <code>tan()</code></span>
+                                </div>
+                            </div>
+
+                            <div class="symbol-item">
+                                <div class="symbol-icon"><kbd>exp()</kbd></div>
+                                <div class="symbol-desc">
+                                    <strong>Eksponensial</strong>
+                                    <span>Contoh: <code>exp(x)</code></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="tutorial-card">
+                        <div class="tutorial-card-header">
+                            <i class="ti ti-calculator"></i>
+                            <h3>Metode Eliminasi Gauss</h3>
+                        </div>
+                        <p class="text-muted">Contoh soal SPL tiga variabel Metode Eliminasi Gauss</p>
+
+                        <div class="image-wrapper">
+                            <img src="ContohEliminasiGauss.webp" alt="Contoh Soal Eliminasi Gauss" loading="lazy">
+                        </div>
+
+                        <div class="tutorial-section">
+                            <h4 class="section-title">
+                                <i class="ti ti-search"></i>
+                                Cara Kerja Kalkulator Metode Eliminasi Gauss
+                            </h4>
+
+                            <ol class="custom-list">
+                                <li>Masukkan matriks augmented <b>[A|B]</b> yang merepresentasikan sistem persamaan linear.</li>
+
+                                <li>Pilih elemen pivot terbesar pada setiap kolom (<b>Partial Pivoting</b>) untuk meningkatkan stabilitas perhitungan dan menghindari pembagian dengan nol.</li>
+
+                                <li>Lakukan <b>Operasi Baris Elementer (OBE)</b> hingga matriks berubah menjadi bentuk segitiga atas.</li>
+
+                                <li>Periksa <b>rank matriks</b> untuk menentukan apakah sistem memiliki solusi tunggal, tidak memiliki solusi, atau memiliki banyak solusi.</li>
+
+                                <li>Jika solusi tunggal diperoleh, lakukan <b>Substitusi Balik (Back Substitution)</b> untuk menghitung nilai setiap variabel hingga diperoleh solusi akhir.</li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-section">
+                            <h4 class="section-title"><i class="ti ti-keyboard"></i> Contoh Inputan Eliminasi Gauss</h4>
+                            <p class="text-muted">Masukkan jumlah variabel, klik <b>Buat Matriks</b>, lalu isi nilai
+                                matriks sesuai soal.</p>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>Format Input</span>
+                                </div>
+                                <pre>
+         Kolom 1| Kolom 2 | Kolom 3 | Konstanta
+Baris 1 :   2   |    4    |   -2    |     2
+Baris 2 :   4   |    9    |   -3    |     8
+Baris 3 :  -2   |   -3    |    7    |    10</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tutorial-card">
+                        <div class="tutorial-card-header">
+                            <i class="ti ti-math"></i>
+                            <h3>Metode Gauss Seidel</h3>
+                        </div>
+
+                        <p class="text-muted">Contoh SPL tiga variabel menggunakan metode Gauss-Seidel dengan solusi
+                            awal (1, 2, 2) dan toleransi 0,3.</p>
+                        <div class="image-wrapper">
+                            <img src="ContohGaussSeidel.webp" alt="Contoh Soal Gauss-Seidel" loading="lazy">
+                        </div>
+
+                        <div class="tutorial-section">
+                            <h4 class="section-title">
+                                <i class="ti ti-search"></i>
+                                Cara Kerja Kalkulator Metode Gauss-Seidel
+                            </h4>
+
+                            <ol class="custom-list">
+                                <li>Masukkan matriks augmented sistem persamaan linear (SPL), nilai toleransi (ε), jumlah iterasi maksimum, dan tebakan awal (opsional).</li>
+                                <li>Ubah setiap persamaan ke bentuk iterasi:
+                                    <br><b>xᵢ = (bᵢ − Σaᵢⱼxⱼ) / aᵢᵢ</b>
+                                </li>
+                                <li>Hitung nilai <b>x₁, x₂, ..., xₙ</b> secara berurutan menggunakan nilai terbaru yang diperoleh pada iterasi yang sama.</li>
+                                <li>Hitung galat relatif setiap variabel:
+                                    <br><b>Ex = |(x<sub>baru</sub> − x<sub>lama</sub>) / x<sub>baru</sub>|</b>
+                                </li>
+                                <li>Ulangi proses hingga seluruh galat memenuhi <b>Ex &lt; ε</b> atau jumlah iterasi maksimum tercapai. Nilai iterasi terakhir menjadi solusi hampiran SPL.</li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-section">
+                            <h4 class="section-title">
+                                <i class="ti ti-keyboard"></i>
+                                Contoh Inputan Gauss-Seidel
+                            </h4>
+
+                            <p class="text-muted">
+                                Tentukan jumlah variabel, klik <b>Buat Matriks</b>, lalu isi nilai matriks.
+                                Solusi awal, toleransi (ε), dan iterasi bersifat opsional.
+                            </p>
+
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>Format Input</span>
+                                </div>
+                                <pre>
+         Kolom 1 | Kolom 2 | Kolom 3 | Konstanta
+Baris 1 :   4    |   -1    |    1    |     7
+Baris 2 :   4    |   -8    |    1    |   -21
+Baris 3 :  -2    |    1    |    5    |    15
+------------------------------------------------
+Solusi Awal : 1 | 2 | 2 |
+Toleransi   : 0.03
+Iterasi     : 50
+
+Catatan:
+Toleransi(ε) (Opsional) → Jika kosong menggunakan nilai default 0.0001
+Maksimum Iterasi (Opsional) → Jika kosong menggunakan nilai default 50
+Solusi Awal (Opsional) → Jika kosong menggunakan nilai awal (0,0,...,0)</pre>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="tutorial-card">
+                        <div class="tutorial-card-header">
+                            <i class="ti ti-cut"></i>
+                            <h3>Metode Bisection</h3>
+                        </div>
+
+                        <p class="text-muted">
+                            Contoh pencarian akar persamaan menggunakan metode Bisection dengan interval awal a = 2 dan
+                            b = 3, ketelitian 3 digit, serta toleransi 0.0001.
+                        </p>
+                        <div class="image-wrapper">
+                            <img src="ContohBisection.webp" alt="Contoh Soal Gauss-Seidel" loading="lazy">
+                        </div>
+
+                        <div class="tutorial-section">
+                            <h4 class="section-title">
+                                <i class="ti ti-search"></i>
+                                Cara Kerja Kalkulator Metode Bisection
+                            </h4>
+
+                            <ol class="custom-list">
+                                <li>
+                                    Masukkan fungsi <b>f(x)</b>, batas bawah <b>a</b>,
+                                    batas atas <b>b</b>, toleransi <b>(ε)</b>, dan jumlah iterasi maksimum.
+                                </li>
+
+                                <li>
+                                    Sistem memvalidasi bahwa <b>f(a)</b> dan <b>f(b)</b> memiliki tanda
+                                    berbeda. Jika salah satu batas menghasilkan <b>f(x)=0</b>, maka akar
+                                    eksak langsung ditemukan.
+                                </li>
+
+                                <li>
+                                    Hitung titik tengah selang menggunakan:
+                                    <br><b>c = (a + b)/2</b>,
+                                    kemudian evaluasi nilai <b>f(a)</b>, <b>f(c)</b>, dan <b>f(b)</b>.
+                                </li>
+
+                                <li>
+                                    Tentukan selang baru berdasarkan perubahan tanda:
+                                    <br><b>f(a) × f(c) &lt; 0 → b = c</b>
+                                    <br><b>f(a) × f(c) &gt; 0 → a = c</b>.
+                                </li>
+
+                                <li>
+                                    Hitung estimasi galat menggunakan:
+                                    <br><b>|b − c|</b>,
+                                    kemudian ulangi proses hingga galat memenuhi toleransi,
+                                    akar eksak ditemukan, atau jumlah iterasi maksimum tercapai.
+                                </li>
+
+                                <li>
+                                    Sistem menampilkan nilai hampiran akar, nilai fungsi pada akar,
+                                    estimasi galat, dan jumlah iterasi yang dilakukan.
+                                </li>
+                            </ol>
+                        </div>
+                        <div class="tutorial-section">
+                            <h4 class="section-title">
+                                <i class="ti ti-keyboard"></i>
+                                Contoh Inputan Bisection
+                            </h4>
+
+                            <p class="text-muted">
+                                Isi fungsi f(x), interval a dan b, ketelitian, serta toleransi.
+                            </p>
+
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>Format Input</span>
+                                </div>
+                                <pre>
+Fungsi f(x) : x^3-4*x-9
+a           : 2
+b           : 3
+Ketelitian  : 3
+Toleransi   : 0.0001
+
+Catatan:
+- f(a) dan f(b) harus memiliki tanda berbeda
+- Ketelitian (opsional): jumlah digit desimal hasil, default 3 digit
+- Toleransi (opsional): batas galat iterasi, default 0.0001
+</pre>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="tutorial-card">
+                        <div class="tutorial-card-header">
+                            <i class="ti ti-chart-line"></i>
+                            <h3>Metode Secant</h3>
+                        </div>
+
+                        <p class="text-muted">
+                            Contoh pencarian akar persamaan menggunakan metode Secant dengan tebakan awal x₀ = 2 dan x₁
+                            = 3, serta maksimum 10 iterasi.
+                        </p>
+                        <div class="image-wrapper">
+                            <img src="ContohSecant.webp" alt="Contoh Soal Gauss-Seidel" loading="lazy">
+                        </div>
+
+                        <div class="tutorial-section">
+                            <h4 class="section-title">
+                                <i class="ti ti-search"></i>
+                                Cara Kerja Kalkulator Metode Secant
+                            </h4>
+
+                            <ol class="custom-list">
+                                <li>
+                                    Masukkan fungsi <b>f(x)</b>, tebakan awal <b>x₀</b>,
+                                    <b>x₁</b>, dan jumlah iterasi maksimum.
+                                </li>
+
+                                <li>
+                                    Sistem melakukan validasi data masukan, kemudian menghitung
+                                    nilai <b>f(x₀)</b> dan <b>f(x₁)</b>.
+                                </li>
+
+                                <li>
+                                    Hitung pendekatan akar berikutnya menggunakan rumus Secant:
+                                    <br>
+                                    <b>x₂ = x₁ − [f(x₁)(x₁ − x₀)] / [f(x₁) − f(x₀)]</b>.
+                                </li>
+
+                                <li>
+                                    Hitung galat absolut menggunakan:
+                                    <br>
+                                    <b>|x₂ − x₁|</b>.
+                                </li>
+
+                                <li>
+                                    Perbarui nilai dengan
+                                    <b>x₀ = x₁</b> dan
+                                    <b>x₁ = x₂</b>,
+                                    kemudian ulangi proses hingga galat lebih kecil dari toleransi
+                                    atau jumlah iterasi maksimum tercapai.
+                                </li>
+
+                                <li>
+                                    Sistem menampilkan akar hampiran, nilai fungsi pada akar,
+                                    galat akhir, jumlah iterasi, serta status konvergensi.
+                                </li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-section">
+                            <h4 class="section-title">
+                                <i class="ti ti-keyboard"></i>
+                                Contoh Inputan Secant
+                            </h4>
+
+                            <p class="text-muted">
+                                Isi fungsi f(x), nilai awal x₀ dan x₁, serta jumlah iterasi.
+                            </p>
+
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>Format Input</span>
+                                </div>
+                                <pre>
+Fungsi f(x) : x^3-4*x-9
+x0          : 2
+x1          : 3
+Iterasi     : 10
+
+Catatan:
+- x0 dan x1 merupakan dua tebakan awal akar
+- Iterasi menentukan jumlah maksimum perulangan(Opsional)
+</pre>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="tutorial-card">
+                        <div class="tutorial-card-header">
+                            <i class="ti ti-function"></i>
+                            <h3>Metode Interpolasi Newton</h3>
+                        </div>
+
+                        <p class="text-muted">
+                            Contoh interpolasi Newton menggunakan data yang diberikan untuk memperkirakan nilai fungsi
+                            pada x = 2.5 dan menghitung galat interpolasinya.
+                        </p>
+                        <div class="image-wrapper">
+                            <img src="ContohInterpolasiNewton.webp" alt="Contoh Soal Gauss-Seidel" loading="lazy">
+                        </div>
+
+                        <div class="tutorial-section">
+                            <h4 class="section-title">
+                                <i class="ti ti-search"></i>
+                                Cara Kerja Kalkulator Metode Interpolasi Newton
+                            </h4>
+
+                            <ol class="custom-list">
+                                <li>
+                                    Masukkan titik data <b>X</b>, <b>Y</b>, nilai target <b>X</b>, dan
+                                    (opsional) fungsi asli untuk evaluasi galat.
+                                </li>
+
+                                <li>
+                                    Sistem melakukan validasi data masukan, termasuk memastikan jumlah
+                                    data X dan Y sama, nilai X tidak duplikat, serta memberikan
+                                    peringatan apabila target berada di luar rentang data
+                                    (ekstrapolasi).
+                                </li>
+
+                                <li>
+                                    Susun tabel beda terbagi untuk memperoleh koefisien
+                                    <b>b₀, b₁, b₂, ..., bₙ</b>.
+                                </li>
+
+                                <li>
+                                    Bentuk polinom interpolasi Newton:
+                                    <br>
+                                    <b>P(x) = b₀ + b₁(x − x₀) + b₂(x − x₀)(x − x₁) + ...</b>
+                                </li>
+
+                                <li>
+                                    Substitusikan nilai target <b>x</b> ke dalam polinom untuk
+                                    memperoleh nilai hampiran fungsi.
+                                </li>
+
+                                <li>
+                                    Jika fungsi asli diisi, sistem menghitung nilai analitik dan
+                                    mengevaluasi galat antara hasil interpolasi dan nilai sebenarnya.
+                                </li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-section">
+                            <h4 class="section-title">
+                                <i class="ti ti-keyboard"></i>
+                                Contoh Inputan Interpolasi Newton
+                            </h4>
+
+                            <p class="text-muted">
+                                Isi data x, data y, dan nilai x yang dicari.
+                            </p>
+
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>Format Input</span>
+                                </div>
+                                <pre>
+Data x      : 1 2 3 4
+Data y/f(x) : 2 5 10 17
+Nilai x     : 2.5
+Fungsi Asli : x^2+1
+
+Catatan:
+- Data x dan data y harus berjumlah sama
+- Pisahkan setiap data menggunakan spasi
+- Fungsi Asli bersifat opsional untuk menghitung galat
+</pre>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="tutorial-card">
+                        <div class="tutorial-card-header">
+                            <i class="ti ti-chart-dots"></i>
+                            <h3>Metode Integrasi Trapesium</h3>
+                        </div>
+
+                        <p class="text-muted">
+                            Contoh perhitungan integral menggunakan metode Trapesium pada interval [0, 2] dengan 4
+                            subinterval.
+                        </p>
+                        <div class="image-wrapper">
+                            <img src="ContohTrapesium.webp" alt="Contoh Soal Gauss-Seidel" loading="lazy">
+                        </div>
+
+                        <div class="tutorial-section">
+                            <h4 class="section-title">
+                                <i class="ti ti-search"></i>
+                                Cara Kerja Kalkulator Metode Integrasi Trapesium
+                            </h4>
+
+                            <ol class="custom-list">
+                                <li>
+                                    Masukkan fungsi <b>f(x)</b>, batas bawah integral <b>a</b>,
+                                    batas atas integral <b>b</b>, dan jumlah pias <b>(n)</b>.
+                                </li>
+
+                                <li>
+                                    Sistem melakukan validasi data inputan. Jika batas integral
+                                    <b>a > b</b>, sistem akan menukar batas integral secara otomatis
+                                    dan menyesuaikan tanda hasil akhir.
+                                </li>
+
+                                <li>
+                                    Hitung lebar interval menggunakan:
+                                    <br><b>h = (b − a)/n</b>.
+                                </li>
+
+                                <li>
+                                    Tentukan titik partisi
+                                    <b>x₀, x₁, ..., xₙ</b> menggunakan
+                                    <b>xᵢ = a + i × h</b>,
+                                    kemudian hitung nilai <b>f(xᵢ)</b> pada setiap titik.
+                                </li>
+
+                                <li>
+                                    Hitung nilai integral hampiran menggunakan rumus Trapesium:
+                                    <br><b>I = (h/2)[f(x₀) + 2Σf(xᵢ) + f(xₙ)]</b>.
+                                </li>
+
+                                <li>
+                                    Sistem menghitung evaluasi galat dengan membandingkan hasil
+                                    Metode Trapesium terhadap nilai integral referensi numerik,
+                                    kemudian menampilkan nilai integral hampiran beserta galatnya.
+                                </li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-section">
+                            <h4 class="section-title">
+                                <i class="ti ti-keyboard"></i>
+                                Contoh Inputan Integrasi Trapesium
+                            </h4>
+
+                            <p class="text-muted">
+                                Isi fungsi f(x), batas a dan b, serta jumlah subinterval.
+                            </p>
+
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>Format Input</span>
+                                </div>
+                                <pre>
+Fungsi f(x) : x^2
+a           : 0
+b           : 2
+n           : 4
+
+Catatan:
+- n adalah jumlah subinterval (pias)
+- Semakin besar n, hasil biasanya semakin akurat
+</pre>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="tutorial-card">
+                        <div class="tutorial-card-header">
+                            <i class="ti ti-route"></i>
+                            <h3>Metode Runge Kutta Orde 3</h3>
+                        </div>
+
+                        <p class="text-muted">
+                            Contoh penyelesaian persamaan diferensial menggunakan metode Runge-Kutta Orde 3 dengan
+                            kondisi awal x₀ = 0, y₀ = 2, langkah h = 0.1, dan 5 iterasi.
+                        </p>
+                        <div class="image-wrapper">
+                            <img src="ContohRungeKutta.webp" alt="Contoh Soal Gauss-Seidel" loading="lazy">
+                        </div>
+
+                        <div class="tutorial-section">
+                            <h4 class="section-title">
+                                <i class="ti ti-search"></i>
+                                Cara Kerja Kalkulator Metode Runge-Kutta Orde 3
+                            </h4>
+
+                            <ol class="custom-list">
+                                <li>
+                                    Masukkan persamaan diferensial <b>dy/dx = f(x,y)</b>, nilai awal
+                                    <b>(x₀, y₀)</b>, lebar langkah <b>h</b>, dan jumlah iterasi.
+                                </li>
+
+                                <li>
+                                    Hitung tiga nilai kemiringan:
+                                    <ul>
+                                        <li><b>k₁ = h · f(xₙ, yₙ)</b></li>
+                                        <li><b>k₂ = h · f(xₙ + h/2, yₙ + k₁/2)</b></li>
+                                        <li><b>k₃ = h · f(xₙ + h, yₙ − k₁ + 2k₂)</b></li>
+                                    </ul>
+                                </li>
+
+                                <li>
+                                    Hitung perubahan nilai <b>y</b> menggunakan:
+                                    <br><b>Δy = (k₁ + 4k₂ + k₃)/6</b>.
+                                </li>
+
+                                <li>
+                                    Perbarui nilai:
+                                    <br><b>xₙ₊₁ = xₙ + h</b>
+                                    <br><b>yₙ₊₁ = yₙ + Δy</b>.
+                                </li>
+
+                                <li>
+                                    Ulangi proses hingga seluruh iterasi selesai. Nilai
+                                    <b>(xₙ₊₁, yₙ₊₁)</b> pada langkah terakhir merupakan solusi hampiran
+                                    persamaan diferensial.
+                                </li>
+                            </ol>
+                        </div>
+
+                        <div class="tutorial-section">
+                            <h4 class="section-title">
+                                <i class="ti ti-keyboard"></i>
+                                Contoh Inputan Runge-Kutta Orde 3
+                            </h4>
+
+                            <p class="text-muted">
+                                Isi fungsi dy/dx = f(x,y), nilai awal x₀ dan y₀, langkah h, serta iterasi.
+                            </p>
+
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span>Format Input</span>
+                                </div>
+                                <pre>
+Fungsi dy/dx : x+y
+x0           : 0
+y0           : 2
+h            : 0.1
+Iterasi      : 5
+
+Catatan:
+- Fungsi dapat menggunakan variabel x dan y
+- h adalah ukuran langkah (step size)
+- Iterasi menentukan banyaknya langkah perhitungan RK4
+</pre>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+</body>
+
+</html>
